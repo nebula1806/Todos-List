@@ -1,53 +1,57 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-export const AddTodo = ({ addTodo }) => {
-  const [title, setTitle] = useState("");
-  const [desc, setDesc] = useState("");
-  const [date, setDate] = useState(""); /* use state logic??*/
+// 1. We cleanly accept both 'addTodo' and 'mode' as props here
+export const AddTodo = ({ addTodo, mode }) => {
+    const [title, setTitle] = useState("");
+    const [desc, setDesc] = useState("");
+    const [date, setDate] = useState("");
 
-  const submit = (e) => {
-    e.preventDefault();
-    if (!title || !desc || !date) {
-      alert("Title or Description cannot be blank");
-    } else {
-      addTodo(title, desc, date);
-      setTitle("");
-      setDesc("");
-      setDate("");
-    }
-  };
-  return (
-    <div className="container my-3">
-      <h3>Add a Todo</h3>
-      <form onSubmit={submit}>
+    const submit = (e) => {
+        e.preventDefault();
+        if (!title || !desc) {
+            alert("Title or Description cannot be blank");
+            return;
+        }
+        addTodo(title, desc, date);
+        setTitle("");
+        setDesc("");
+        setDate("");
+    };
+
+    return (
+        <div className="container my-3">
+            
+            {/* 2. THE FIX: No placeholders! The template literal dynamically adds bg-dark and text-light when mode is 'dark' */}
+            <div className={`card shadow-sm border-0 mb-4 ${mode === 'dark' ? 'bg-dark text-light' : ''}`}>
                 
-                {/* 1. Wrap Title and Description in a single 'row' */}
-                <div className="row mb-3">
+                <div className="card-body p-4">
+                    <h4 className="card-title mb-4">Add a Todo</h4>
                     
-                    {/* 2. col-md-6 makes this take up exactly half the row */}
-                    <div className="col-md-6">
-                        <label htmlFor="title" className="form-label">Todo Title</label>
-                        {/* Notice I removed the 300px style—Bootstrap handles the width now! */}
-                        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="form-control" id="title" />
-                    </div>
-                    
-                    {/* 3. col-md-6 makes this take up the other half! */}
-                    <div className="col-md-6">
-                        <label htmlFor="desc" className="form-label">Todo Description</label>
-                        <input type="text" value={desc} onChange={(e) => setDesc(e.target.value)} className="form-control" id="desc" />
-                    </div>
-                    
+                    <form onSubmit={submit}>
+                        <div className="row mb-3">
+                            <div className="col-md-6">
+                                <label htmlFor="title" className="form-label text-muted fw-bold">Todo Title</label>
+                                <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="form-control" id="title" placeholder="What needs to be done?" />
+                            </div>
+                            <div className="col-md-6">
+                                <label htmlFor="desc" className="form-label text-muted fw-bold">Todo Description</label>
+                                <input type="text" value={desc} onChange={(e) => setDesc(e.target.value)} className="form-control" id="desc" placeholder="Add some details..." />
+                            </div>
+                        </div>
+
+                        <div className="mb-4">
+                            <label htmlFor="date" className="form-label text-muted fw-bold">Due Date</label>
+                            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="form-control w-50" id="date" />
+                        </div>
+
+                        <button type="submit" className="btn btn-success px-4">
+                            Add Todo
+                        </button>
+                    </form>
                 </div>
 
-                {/* The Due Date sits neatly underneath the row */}
-                <div className="mb-3">
-                    <label htmlFor="date" className="form-label">Due Date</label>
-                    {/* I added a w-50 class here just to keep the date box from stretching too wide! */}
-                    <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="form-control w-50" id="date" />
-                </div>
-
-                <button type="submit" className="btn btn-sm btn-success">Add Todo</button>
-            </form>
-    </div>
-  );
+            </div>
+            
+        </div>
+    );
 };

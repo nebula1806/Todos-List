@@ -4,11 +4,17 @@ import { Todos } from "./MyComponents/Todos";
 import { Footer } from "./MyComponents/Footer";
 import { AddTodo } from "./MyComponents/AddTodo";
 import { About } from "./MyComponents/About";
-import { UserInfo }from "./MyComponents/UserInfo"
+import { UserInfo } from "./MyComponents/UserInfo";
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
+// Notifications
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 function App() {
+  
+  // 1. Initialize Todos from Local Storage
   let initTodo;
   if (localStorage.getItem("todos") === null) {
     initTodo = [];
@@ -16,41 +22,64 @@ function App() {
     initTodo = JSON.parse(localStorage.getItem("todos"));
   }
 
-  const onDelete = (todo) => {
-    console.log("I am ondelete of todo", todo);
-    // Deleting this way in react does not work
-    // let index = todos.indexOf(todo);
-    // todos.splice(index, 1);
+  // 2. All Application State
+  const [todos, setTodos] = useState(initTodo);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortConfig, setSortConfig] = useState({
+    key: "date",
+    direction: "ascending",
+  });
+  const [mode, setMode] = useState('light'); // Dark Mode State
 
+  // 3. Save to Local Storage automatically
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todos));
+  }, [todos]);
+
+  // 4. Dark Mode Logic
+  const toggleMode = () => {
+    if (mode === 'light') {
+      setMode('dark');
+      document.body.style.backgroundColor = '#121212';
+      document.body.style.color = 'white';
+    } else {
+      setMode('light');
+      document.body.style.backgroundColor = '#e0f7fa'; // Your custom cyan background
+      document.body.style.color = '#212529';
+    }
+  };
+
+  // 5. Todo Operations (Delete, Edit, Add)
+  const onDelete = (todo) => {
     setTodos(
       todos.filter((e) => {
         return e !== todo;
-      }),
+      })
     );
-    console.log("deleted", todos);
-    localStorage.setItem("todos", JSON.stringify(todos));
   };
 
-const editTodo = (sno, newTitle, newDesc, newDate) => {
-  const updatedTodos = todos.map((todo) => {
-    if (todo.sno === sno){
-      return{...todo, title: newTitle, desc: newDesc, date: newDate};
-    }
-    return todo;
-  });
-  setTodos(updatedTodos);
-}
+  const editTodo = (sno, newTitle, newDesc, newDate) => {
+    const updatedTodos = todos.map((todo) => {
+      if (todo.sno === sno) {
+        return { ...todo, title: newTitle, desc: newDesc, date: newDate };
+      }
+      return todo;
+    });
+    setTodos(updatedTodos);
+  };
 
   const addTodo = (title, desc, date) => {
-    console.log("I am adding this todo", title, desc);
     let sno;
     if (todos.length === 0) {
       sno = 0;
     } else {
       sno = todos[todos.length - 1].sno + 1;
     }
+    
+    // Assign a random pastel color to the row
     const colors = ["#ffcccb", "#d4edda", "#cce5ff", "#fff3cd", "#e2d9f3"];
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    
     const myTodo = {
       sno: sno,
       title: title,
@@ -58,19 +87,11 @@ const editTodo = (sno, newTitle, newDesc, newDate) => {
       color: randomColor,
       date: date,
     };
+    
     setTodos([...todos, myTodo]);
-    console.log(myTodo);
   };
 
-  const [todos, setTodos] = useState(initTodo);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortConfig, setSortConfig] = useState({
-    key: "date",
-    direction: "ascending",
-  });
-  useEffect(() => {
-    localStorage.setItem("todos", JSON.stringify(todos));
-  }, [todos]);
+  // 6. Search and Sorting Logic
   const filteredTodos = todos.filter((todo) => {
     return (
       todo.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -103,26 +124,35 @@ const editTodo = (sno, newTitle, newDesc, newDate) => {
     setSortConfig({ key, direction });
   };
 
+  // 7. Render the App
   return (
     <>
       <Router>
+        {/* The Anchor Point for Pop-up Notifications */}
+        <ToastContainer position="bottom-right" autoClose={3000} theme="colored" />
+        
         <Header
           title="My Todos List"
           searchBar={false}
           onSearch={setSearchQuery}
+          mode={mode}
+          toggleMode={toggleMode}
         />
+        
         <Switch>
+          
+          {/* Main Dashboard (Todos) */}
           <Route
             exact
             path="/"
             render={() => {
               return (
                 <>
-                  <AddTodo addTodo={addTodo} />
+                  <AddTodo addTodo={addTodo} mode={mode} />
                   <Todos
                     todos={filteredTodos}
                     onDelete={onDelete}
-                    onEdit={editTodo} 
+                    onEdit={editTodo}
                     requestSort={requestSort}
                     sortConfig={sortConfig}
                     searchQuery={searchQuery}
@@ -133,19 +163,22 @@ const editTodo = (sno, newTitle, newDesc, newDate) => {
             }}
           ></Route>
           
+          {/* About Page */}
           <Route exact path="/about">
-            <About />
+            <About mode={mode} />
           </Route>
 
-          {/* NEW: Your User Info Route! */}
+          {/* User Management Dashboard */}
           <Route exact path="/userinfo">
-            <UserInfo />
+            <UserInfo mode={mode} />
           </Route>
           
         </Switch>
-        <Footer />
+        
+        <Footer mode={mode} />
       </Router>
     </>
   );
 }
+
 export default App;

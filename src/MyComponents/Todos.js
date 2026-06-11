@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { TodoItem } from "./TodoItem";
 import * as XLSX from "xlsx"; 
+import { toast } from "react-toastify";
+import emptySvg from '../Assets/undraw_taken_mshk.svg'
 
 export const Todos = (props) => {
   // 1. Pagination States
@@ -32,6 +34,7 @@ export const Todos = (props) => {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "My Todos");
     XLSX.writeFile(workbook, "Todos_List.xlsx");
+    toast.success("Excel file downloaded successfully!");
   };
 
   return (
@@ -57,7 +60,16 @@ export const Todos = (props) => {
       </div>
 
       {props.todos.length === 0 ? (
-        <div className="alert alert-info">No Todos to display!</div>
+        <div className="text-center my-5 py-5">
+            <img 
+                src={emptySvg} 
+                alt="No Todos Left" 
+                className="img-fluid mb-4" 
+                style={{ maxWidth: "250px", opacity: "0.8" }} 
+            />
+            <h4 className="text-muted fw-bold">All caught up!</h4>
+            <p className="text-muted">You have no tasks pending. Take a break or add a new todo above.</p>
+        </div>
       ) : (
         <div className="table-responsive">
           <table className="table table-hover table-bordered align-middle mt-3">
