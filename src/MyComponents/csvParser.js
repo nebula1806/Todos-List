@@ -8,7 +8,6 @@ export const parseUserCSV = (file) => {
             header: true,
             skipEmptyLines: true,
             
-            // THE MAGIC FIX 1: This automatically turns " Email " into "email"
             transformHeader: (header) => header.trim().toLowerCase(),
             
             complete: (results) => {
@@ -17,13 +16,11 @@ export const parseUserCSV = (file) => {
                 let errorCount = 0;
 
                 rawData.forEach((row) => {
-                    
-                    // THE MAGIC FIX 2: Safely extract variables before we test them
+
                     const safeName = row.name ? String(row.name).trim() : "";
                     const safeEmail = row.email ? String(row.email).trim() : "";
                     const safePhone = row.phone ? String(row.phone).trim() : "";
 
-                    // If name or email is blank after trimming, skip the row safely
                     if (!safeName || !safeEmail) {
                         errorCount++;
                         return;
